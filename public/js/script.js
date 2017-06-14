@@ -1,22 +1,28 @@
 $("document").ready(function() {
 
-  $("li").each(function(i) {
-    console.log(i);
-  });
+  $( function() {
+    $( "#cityListUL" ).sortable({
+      axis: 'y',
+      update: function (event, ui) {
 
+          //var data = $(this).sortable('toArray', {attribute: 'itemid'});//, key: 'itemid'});
+          var data = $(".list-group").sortable('toArray', {attribute: 'itemid'});//, key: 'itemid'});
 
-  $("li").click(function(){ 
+          //alert(JSON.stringify(data));
 
-    $("#content").html( "<p>new content !!!</p>" );
-
-    $("#btn-valide").remove();
-    $(this).fadeOut().delay(5000).fadeIn();
-
-  });
-  
-  
-  $.getJSON("http://api.openweathermap.org/data/2.5/weather?q=Lyon&APPID=9b754f1f40051783e4f72c176953866e&units=metric&lang=fr", function(data) {
-    console.log(data);
-  });
+          //console.log("data: " + JSON.parse(data));
+          //console.log("ui: " + JSON.parse(ui));
+          //POST to server using $.post or $.ajax
+          $.ajax({
+              //dataType: "json",
+              data: {data:data},
+              type: 'GET',
+              url: '/sort'
+          });
+      }
+    });
+    $( "#cityListUL" ).disableSelection();
+    
+  } );
   
 })

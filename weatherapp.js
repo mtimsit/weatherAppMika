@@ -30,37 +30,14 @@ var cityList = [
 
 ];
 
-function getImage(weatherDesc)
-{
-  var imageURL = "";
-  switch(weatherDesc.toLowerCase())
-    {
-      case "nuageux":
-        imageURL = "http://openweathermap.org/img/w/03d.png";
-        break;
-
-      case "ciel dégagé":
-        imageURL = "http://openweathermap.org/img/w/01d.png";
-        break;
-      
-      case "partiellement ensoleillé":
-        imageURL = "http://openweathermap.org/img/w/02d.png";
-        break;
-
-      case "couvert":
-        imageURL = "http://openweathermap.org/img/w/02d.png";
-        break;
-    }
-
-  return imageURL;
-};
 
 function addCity(body) {
   var jsonBody = JSON.parse(body);
         
         var newCity = {
+          id:jsonBody.id,
           city: jsonBody.name,
-          image: getImage(jsonBody.weather[0].description),
+          image: "http://openweathermap.org/img/w/"+jsonBody.weather[0].icon+".png",
           desc: jsonBody.weather[0].description,
           tempMin: jsonBody.main.temp_min + "° C",
           tempMax: jsonBody.main.temp_max + "° C"
@@ -75,33 +52,59 @@ function deleteCity(id)
   cityList.splice(id,1);
 }
 
+function sortCityList(idList)
+{
+  var idTab = idList;
+
+  var tempCityList = [];
+  for(var i=0;i<cityList.length;i++)
+  {
+    tempCityList[i] = cityList[i];
+  }
+
+  for(var i=0; i<idTab.length; i++)
+  {
+    for(var j=0;j<tempCityList.length;j++)
+    {
+      if(tempCityList[j].id == idTab[i])
+      {
+        cityList[i] = tempCityList[j];
+      }
+    }
+    //cityList[i] = tempCityList[parseInt(idTab[i])];
+  }
+}
+
 app.get("/", function (req, res) {
 
-    var callbackAdd = "";
+  res.render('index', {cityList: cityList}); //action: action, clientId : clientId});
+});
 
-    switch(req.query.action.toUpperCase())
-    {
-      case "READ":
-      res.render('index', {cityList: cityList}); //action: action, clientId : clientId});
-        break;
+app.get("/read", function (req, res) {
 
-      case "ADD":
-      request("http://api.openweathermap.org/data/2.5/weather?q="+req.query.city+"&units=metric&lang=fr&appid=75a5967a4efca92984636371d0b024ca", function(error, response, body) {
-        addCity(body);     
-        console.log(body);
+  res.render('index', {cityList: cityList}); //action: action, clientId : clientId});
+});
+
+app.get("/add", function (req, res) {
+
+  request("http://api.openweathermap.org/data/2.5/weather?q="+req.query.city+"&units=metric&lang=fr&appid=75a5967a4efca92984636371d0b024ca", function(error, response, body) {
+        addCity(body); 
+        //console.log(body);
         res.render('index', {cityList: cityList});
       });
-        break;
-      
-      case "DELETE":
-      deleteCity(req.query.id);
-      res.render('index', {cityList: cityList});
-        break;
-    }
+});
 
-    
-    
-    
+app.get("/delete", function (req, res) {
+
+  deleteCity(req.query.id);
+  res.render('index', {cityList: cityList});
+});
+
+app.get("/sort", function (req, res) {
+
+      console.log(req.query.data);
+      sortCityList(req.query.data);
+      res.render('index', {cityList: cityList});
 });
 
 /*app.post("/", function (req, res) {
